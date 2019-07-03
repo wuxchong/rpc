@@ -1,5 +1,6 @@
 package remote.procedure.call.client;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
@@ -21,21 +22,36 @@ public class Client {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 //客户端向服务端发送请求；请求某一个具体的接口
                 //发送OutputStream，接收InputStream
+                ObjectInputStream input = null;
+                ObjectOutputStream output = null;
                 Socket socket = new Socket();
-                socket.connect(address);
-                //序列化，发送
-                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                //接口名，方法名 writeUTF
-                output.writeUTF(serviceInterface.getName());
-                output.writeUTF(method.getName());
-                //方法类型，参数
-                output.writeObject(method.getParameterTypes());
-                output.writeObject(args);
-                //等待服务端处理
-
-                //接收服务端处理后的返回值
-                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-                return input.readObject();
+                try {
+                    socket.connect(address);
+                    //序列化，发送
+                    output = new ObjectOutputStream(socket.getOutputStream());
+                    //接口名，方法名 writeUTF
+                    output.writeUTF(serviceInterface.getName());
+                    output.writeUTF(method.getName());
+                    //方法类型，参数
+                    output.writeObject(method.getParameterTypes());
+                    output.writeObject(args);
+                    //等待服务端处理
+                    //接收服务端处理后的返回值
+                    input = new ObjectInputStream(socket.getInputStream());
+                    return input.readObject();//客户端-》服务端-》客户端
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                } finally {
+                    try {
+                        if (output != null)
+                            output.close();
+                        if (input != null)
+                            input.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         };
 
