@@ -19,7 +19,7 @@ public class ServerCenter implements Server {
     public void start() throws IOException {
         ServerSocket server = new ServerSocket();
         server.bind(new InetSocketAddress(port));
-        //等待通信
+        //等待客户端连接
         server.accept();
     }
 
