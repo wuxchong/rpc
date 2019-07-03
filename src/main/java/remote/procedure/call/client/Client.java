@@ -1,5 +1,6 @@
 package remote.procedure.call.client;
 
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -32,7 +33,9 @@ public class Client {
                 output.writeObject(args);
                 //等待服务端处理
 
-                return null;
+                //接收服务端处理后的返回值
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                return input.readObject();
             }
         };
 
